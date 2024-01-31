@@ -6375,11 +6375,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\HP\\source\\repos\\TestProject\\TestProject.csproj",
-      "projectName": "TestProject",
-      "projectPath": "C:\\Users\\HP\\source\\repos\\TestProject\\TestProject.csproj",
+      "projectUniqueName": "C:\\Users\\HP\\Documents\\Selenium_2024\\SeleniumNew.csproj",
+      "projectName": "SeleniumNew",
+      "projectPath": "C:\\Users\\HP\\Documents\\Selenium_2024\\SeleniumNew.csproj",
       "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\HP\\source\\repos\\TestProject\\obj\\",
+      "outputPath": "C:\\Users\\HP\\Documents\\Selenium_2024\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\HP\\AppData\\Roaming\\NuGet\\NuGet.Config",

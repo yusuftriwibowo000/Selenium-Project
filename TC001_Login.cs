@@ -5,9 +5,8 @@ using OpenQA.Selenium.Support.Extensions;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using TestProject;
-using static System.Net.WebRequestMethods;
-namespace TestProject
+using SeleniumNew;
+namespace SeleniumNew
 {
 
     public class Tests

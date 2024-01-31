@@ -10,22 +10,15 @@ using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
 using OpenQA.Selenium;
-using iText.Layout.Layout;
-using iText.Layout.Renderer;
 using iText.Kernel.Geom;
-using iText.Kernel.Events;
-using iText.Kernel.Pdf.Canvas.Draw;
 using iText.Kernel.Pdf.Canvas;
-using iText.Pdfa;
 using iText.Kernel.Font;
-using iText.Pdfa.Checker;
 using iText.Kernel.Colors;
 using iText.IO.Font;
-using System.Reflection.Emit;
 using iText.Layout.Borders;
 using SystemPath = System.IO.Path;
 
-namespace TestProject
+namespace SeleniumNew
 {
     public class LibPDF
     {

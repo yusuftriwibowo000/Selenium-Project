@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\HP\\Documents\\Selenium_2024\\TestProject.csproj": {}
+    "C:\\Users\\HP\\Documents\\Selenium_2024\\SeleniumNew.csproj": {}
   },
   "projects": {
-    "C:\\Users\\HP\\Documents\\Selenium_2024\\TestProject.csproj": {
+    "C:\\Users\\HP\\Documents\\Selenium_2024\\SeleniumNew.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\HP\\Documents\\Selenium_2024\\TestProject.csproj",
-        "projectName": "TestProject",
-        "projectPath": "C:\\Users\\HP\\Documents\\Selenium_2024\\TestProject.csproj",
+        "projectUniqueName": "C:\\Users\\HP\\Documents\\Selenium_2024\\SeleniumNew.csproj",
+        "projectName": "SeleniumNew",
+        "projectPath": "C:\\Users\\HP\\Documents\\Selenium_2024\\SeleniumNew.csproj",
         "packagesPath": "C:\\Users\\HP\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\HP\\Documents\\Selenium_2024\\obj\\",
         "projectStyle": "PackageReference",
