@@ -17,8 +17,9 @@ using iText.Kernel.Colors;
 using iText.IO.Font;
 using iText.Layout.Borders;
 using SystemPath = System.IO.Path;
+using SeleniumNew;
 
-namespace SeleniumNew
+namespace LibraryPDF
 {
     public class LibPDF
     {

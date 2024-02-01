@@ -6,6 +6,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using SeleniumNew;
+using LibraryPDF;
 namespace SeleniumNew
 {
 
