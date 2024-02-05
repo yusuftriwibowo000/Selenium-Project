@@ -40,6 +40,14 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.102.2, )"
+            },
+            "EPPlus": {
+              "target": "Package",
+              "version": "[6.1.0, )"
+            },
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",
               "version": "[17.6.0, )"

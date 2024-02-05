@@ -17,18 +17,20 @@ using iText.Kernel.Colors;
 using iText.IO.Font;
 using iText.Layout.Borders;
 using SystemPath = System.IO.Path;
+using LibraryExcel;
 using SeleniumNew;
 
 namespace LibraryPDF
 {
     public class LibPDF
     {
-        static string projectDir;
+        public static string projectDir;
         public static Document document;
         public static PdfDocument pdf;
         public static Color fontColor;
         public static Color fontColor2;
         public static Color fontColor3;
+        public static Color fontColor4;
         // Create a transparent color with an alpha value
         public static Color transparentColor;
         private static PageSize pageSize;
@@ -37,7 +39,8 @@ namespace LibraryPDF
         private static float verticalPosition;
         private static float verticalPositionBottom;
         private static float centerX;
-        private static float marginPage;
+        private static float marginLeftRight;
+        private static float marginTop;
         // RGB Biru
         static int red      = 49;
         static int green    = 132;
@@ -52,7 +55,7 @@ namespace LibraryPDF
         static int blue3    = 220;
 
         // Inisialisasi Dokumen PDF
-        public static void InitializeDocument()
+        public static void InitializeDocument(string excelPath, string excelSheet)
         {
             string tempProjectDir   = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
             projectDir              = tempProjectDir.Replace("\\", "/"); //Path project
@@ -70,17 +73,18 @@ namespace LibraryPDF
                 Directory.CreateDirectory(todayReportDir);
             }
             
-            PdfWriter writer    = new PdfWriter(mainDir + "/" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".pdf");
+            PdfWriter writer    = new PdfWriter(mainDir + "/" + LibExcel.GetDataExcel(excelPath, "TC_ID", excelSheet)+ "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".pdf");
             pdf                 = new PdfDocument(writer);
             document            = new Document(pdf, PageSize.A4); // document pdf
-            verticalPosition    = pdf.GetDefaultPageSize().GetHeight() - 50; // get vertical position of page
-            //verticalPosition    = pdf.GetDefaultPageSize().GetBottom() + 30; // get vertical position of page
+            marginLeftRight     = 70; // Set koordinat X halaman rata kiri (buat deskripsi gambar)
+            marginTop           = 130;
+            verticalPosition    = pdf.GetDefaultPageSize().GetHeight() - marginTop; // get vertical position of page
             fontColor           = new DeviceRgb(red, green, blue); // blue
             fontColor2          = new DeviceRgb(red2, green2, blue2); //orange
             fontColor3          = new DeviceRgb(red3, green3, blue3); // biru muda
+            fontColor4          = new DeviceRgb(0,128,0); // green
             transparentColor    = new DeviceCmyk(0,0,0,0); // warna transparan
             centerX             = pdf.GetDefaultPageSize().GetWidth() / 2; // get center X
-            marginPage          = 70; // Set koordinat X halaman rata kiri (buat deskripsi gambar)
         }
 
         // Tambah halaman cover ke dokumen PDF
@@ -103,16 +107,16 @@ namespace LibraryPDF
             .SetTextAlignment(TextAlignment.LEFT)
             .SetHorizontalAlignment(HorizontalAlignment.LEFT)
             .ScaleToFit(75f, 50f)
-            .SetFixedPosition(marginPage,centerY - 330);
+            .SetFixedPosition(marginLeftRight,centerY - 330);
 
             Paragraph header = FormattedParagraph(headerText,fontColor, TextAlignment.RIGHT,34, centerX, centerY, true);
             Paragraph header2 = FormattedParagraph(headerText2, fontColor2, TextAlignment.RIGHT, 22, centerX - 25, centerY - 25, true);
             Paragraph header3 = FormattedParagraph(headerText3, DeviceRgb.BLACK, TextAlignment.RIGHT, 20, centerX - 50, centerY - 50);
-            Paragraph header4 = FormattedParagraph(headerText4, DeviceRgb.BLACK, TextAlignment.LEFT, 18, marginPage, centerY - 250);
-            Paragraph header5 = FormattedParagraph(headerText5, DeviceRgb.BLACK, TextAlignment.LEFT, 12, marginPage, centerY - 265);
-            Paragraph header6 = FormattedParagraph(headerText6, DeviceRgb.BLACK, TextAlignment.LEFT, 11, marginPage, centerY - 280);
-            Paragraph header7 = FormattedParagraph(headerText7, new DeviceGray(0.5f), TextAlignment.LEFT, 11, marginPage, centerY - 350);
-            Paragraph header8 = FormattedParagraph(headerText8, new DeviceGray(0.5f), TextAlignment.LEFT, 10, marginPage, centerY - 365, true);
+            Paragraph header4 = FormattedParagraph(headerText4, DeviceRgb.BLACK, TextAlignment.LEFT, 18, marginLeftRight, centerY - 250);
+            Paragraph header5 = FormattedParagraph(headerText5, DeviceRgb.BLACK, TextAlignment.LEFT, 12, marginLeftRight, centerY - 265);
+            Paragraph header6 = FormattedParagraph(headerText6, DeviceRgb.BLACK, TextAlignment.LEFT, 11, marginLeftRight, centerY - 280);
+            Paragraph header7 = FormattedParagraph(headerText7, new DeviceGray(0.5f), TextAlignment.LEFT, 11, marginLeftRight, centerY - 350);
+            Paragraph header8 = FormattedParagraph(headerText8, new DeviceGray(0.5f), TextAlignment.LEFT, 10, marginLeftRight, centerY - 365, true);
 
             document.Add(header);
             document.Add(header2);
@@ -148,9 +152,9 @@ namespace LibraryPDF
         {
             PdfPage page2       = pdf.GetPage(2);
             PdfCanvas canvas    = new PdfCanvas(page2, true); // set canvas di halaman ke-2
-            float xPosition     = marginPage; // Set koordinat X halaman rata kiri (buat deskripsi gambar)
-            float xPosition2    = pdf.GetDefaultPageSize().GetRight() - marginPage; // Set koordinat X halaman rata kanan (buat numbers of page)
-            float yPosition     = page2.GetPageSize().GetTop() - marginPage; // // Set koordinat Y halaman
+            float xPosition     = marginLeftRight; // Set koordinat X halaman rata kiri (buat deskripsi gambar)
+            float xPosition2    = pdf.GetDefaultPageSize().GetRight() - marginLeftRight; // Set koordinat X halaman rata kanan (buat numbers of page)
+            float yPosition     = page2.GetPageSize().GetTop() - marginTop; // // Set koordinat Y halaman
             PdfFont boldFont    = PdfFontFactory.CreateFont(FontConstants.HELVETICA_BOLD);
 
             // Tambah table of contents
@@ -224,10 +228,10 @@ namespace LibraryPDF
         }
 
         //Method Add Document Summary
-        public static void CreateDocumentSummary()
+        public static void CreateDocumentSummary(string excelPath, string excelSheet)
         {
             PdfPage page3 = pdf.GetPage(3);
-            float yPosition = page3.GetPageSize().GetTop() - marginPage; // // Set koordinat Y halaman 3
+            float yPosition = page3.GetPageSize().GetTop() - marginTop; // // Set koordinat Y halaman 3
 
             string titleDocSum = "Document Summary";
             tableOfContent.Add($"{titleDocSum}..3");
@@ -243,20 +247,43 @@ namespace LibraryPDF
             int numColumns = 5; // Jumlah coloumn
 
             // Buat Header Document Summary
-            Table table = new Table(numColumns).SetFixedPosition(marginPage,yPosition-140,475).SetFontSize(8);
+            Table table = new Table(numColumns).SetFixedPosition(marginLeftRight,yPosition-140,475).SetFontSize(8);
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("TC ID").SetBold()));
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Scenario Name").SetBold()));
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Test Case").SetBold()));
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Procedure/Test Step").SetBold()));
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Status").SetBold()));
 
-            // Kolom yang tidak di lakukan rowspan
-            Cell tcID           = new Cell(numRows, 1).Add(new Paragraph("Test Case"));
-            Cell scenarioName   = new Cell(numRows, 1).Add(new Paragraph("Testing"));
-            Cell testCase       = new Cell(numRows, 1).Add(new Paragraph("Step"));
-            table.AddCell(tcID);
-            table.AddCell(scenarioName);
-            table.AddCell(testCase);
+            int jmlFailed = 0;
+            for(int i = 0; i < numRows; i++)
+            {
+                string data = tableOfContent[i];
+                string[] splitData = data.Split(new string[] { ".." }, StringSplitOptions.None);
+                if (splitData[2] == "Failed")
+                {
+                    jmlFailed++;
+                }
+            }
+            if(jmlFailed == 0)
+            {
+                // Kolom yang di lakukan rowspan (Passed)
+                Cell tcID = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TC_ID", excelSheet)).SetFontColor(fontColor4));
+                Cell scenarioName = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "SCENARIO_NAME", excelSheet)).SetFontColor(fontColor4));
+                Cell testCase = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TEST_CASE", excelSheet)).SetFontColor(fontColor4));
+                table.AddCell(tcID);
+                table.AddCell(scenarioName);
+                table.AddCell(testCase);
+            }
+            else
+            {
+                // Kolom yang di lakukan rowspan (Failed)
+                Cell tcID = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TC_ID", excelSheet)).SetFontColor(DeviceRgb.RED));
+                Cell scenarioName = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "SCENARIO_NAME", excelSheet)).SetFontColor(DeviceRgb.RED));
+                Cell testCase = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TEST_CASE", excelSheet)).SetFontColor(DeviceRgb.RED));
+                table.AddCell(tcID);
+                table.AddCell(scenarioName);
+                table.AddCell(testCase);
+            }
 
             // Set kolom Procedure/Test Step dan Status di tambahkan ke tabel sesuai step yang ada tiap TC
             for (int row = 0; row < numRows; row++)
@@ -272,9 +299,25 @@ namespace LibraryPDF
                     }
                     else if(col == 4)
                     {
-                        Cell cell = new Cell().Add(new Paragraph(splitData[2]));
-                        table.AddCell(cell);
-                    } 
+                        // Jika step Passed
+                        if (splitData[2] == "Passed")
+                        {
+                            Cell cell = new Cell().Add(new Paragraph(splitData[2]).SetFontColor(fontColor4));
+                            table.AddCell(cell);
+                        }
+                        // Jika step Failed
+                        else if (splitData[2] == "Failed")
+                        {
+                            Cell cell = new Cell().Add(new Paragraph(splitData[2]).SetFontColor(DeviceRgb.RED));
+                            table.AddCell(cell);
+                        }
+                        // Jika step Done
+                        else
+                        {
+                            Cell cell = new Cell().Add(new Paragraph(splitData[2]));
+                            table.AddCell(cell);
+                        }
+                    }
                 }
             }
             // Tambah element ke dokumen PDF
@@ -310,10 +353,10 @@ namespace LibraryPDF
                 pdf.AddNewPage();
                 pdf.AddNewPage();
             }
-            if (verticalPosition < 200f) // Jika sisa space halaman < 200f
+            if (verticalPosition < 230f) // Jika sisa space halaman < 200f
             {
                 pdf.AddNewPage(); // Go to halaman selanjutnya
-                verticalPosition = pdf.GetDefaultPageSize().GetHeight() - 50f;
+                verticalPosition = pdf.GetDefaultPageSize().GetHeight() - marginTop;
             }
 
             // Format element deskripsi gambar
@@ -321,7 +364,7 @@ namespace LibraryPDF
                 .SetTextAlignment(TextAlignment.LEFT)
                 .SetFontSize(10)
                 .SetMarginBottom(5f)
-                .SetFixedPosition(marginPage, verticalPosition, 500);
+                .SetFixedPosition(marginLeftRight, verticalPosition, 500);
 
             // Format element gambar
             Image img = new Image(ImageDataFactory
@@ -329,7 +372,7 @@ namespace LibraryPDF
                 .SetTextAlignment(TextAlignment.CENTER)
                 .SetHorizontalAlignment(HorizontalAlignment.CENTER)
                 .ScaleAbsolute(450f, 210f)
-                .SetFixedPosition(marginPage, verticalPosition - 210)
+                .SetFixedPosition(marginLeftRight, verticalPosition - 210)
                 .SetMarginBottom(20f);
 
             verticalPosition -= 250f; // Adjust this value based on the space you want between contents
@@ -375,7 +418,7 @@ namespace LibraryPDF
                     document.ShowTextAligned(
                         new Paragraph().Add("Confidential").SetItalic()
                         .SetFontSize(9),
-                        marginPage, // koordinat X
+                        marginLeftRight, // koordinat X
                         30,     // koordinat Y
                         i,      // page number
                         TextAlignment.LEFT,
@@ -404,22 +447,38 @@ namespace LibraryPDF
                         .SetFontSize(11)
                         .SetBold()
                         .SetMarginBottom(5f)
-                        .SetFixedPosition(marginPage, verticalPosition, 500);
+                        .SetFixedPosition(marginLeftRight, verticalPosition, 500);
                     
                     // Create a table
-                    Table table = new Table(UnitValue.CreatePercentArray(4))
+                    Table table = new Table(4)
                         .SetTextAlignment(TextAlignment.LEFT)
                         .SetFontSize(8)
-                        //.SetBorder(Border.NO_BORDER)
-                        .AddCell("Project No.").SetBorder(Border.NO_BORDER)
-                        .AddCell("Project Code").SetBorder(Border.NO_BORDER)
-                        .AddCell("Tester").SetBorder(Border.NO_BORDER)
-                        .AddCell("Automation Team").SetBorder(Border.NO_BORDER)
-                        //.SetBorderBottom(new SolidBorder(DeviceRgb.BLACK, 1))
-                        //.SetBorderTop(new SolidBorder(DeviceRgb.BLACK, 1))
-                        //.SetBorderLeft(new SolidBorder(DeviceRgb.BLACK, 1))
-                        //.SetBorderRight(new SolidBorder(DeviceRgb.BLACK, 1))
-                        .SetFixedPosition(marginPage, verticalPosition - 15, 500);
+                        .SetFixedPosition(marginLeftRight, verticalPosition - 50, 460);
+
+                    Cell cell1 = new Cell(3, 1).Add(new Paragraph("Project No.")).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER);
+                    Cell cell2 = new Cell(3, 1).Add(new Paragraph("Project Code")).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER);
+                    Cell cell3 = new Cell(3, 1).Add(new Paragraph("Tester")).SetBorderRight(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER);
+                    Cell cell4 = new Cell(3, 1).Add(new Paragraph("Automation Team")).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER);
+                    Cell cell5 = new Cell(3, 1).Add(new Paragraph("Project Type")).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER);
+                    Cell cell6 = new Cell(3, 1).Add(new Paragraph("CR / IR / MR")).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER);
+                    Cell cell7 = new Cell(3, 1).Add(new Paragraph("Start Date")).SetBorderRight(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER);
+                    Cell cell8 = new Cell(3, 1).Add(new Paragraph(startEndDate[0])).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER);
+                    Cell cell9 = new Cell(3, 1).Add(new Paragraph("Short Description")).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER).SetBorderBottom(new SolidBorder(DeviceRgb.BLACK, 1));
+                    Cell cell10 = new Cell(3, 1).Add(new Paragraph("Automation Test Execution Document")).SetBorderLeft(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER).SetBorderBottom(new SolidBorder(DeviceRgb.BLACK, 1));
+                    Cell cell11 = new Cell(3, 1).Add(new Paragraph("End Date")).SetBorderRight(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER).SetBorderBottom(new SolidBorder(DeviceRgb.BLACK, 1));
+                    Cell cell12 = new Cell(3, 1).Add(new Paragraph(startEndDate[1])).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER).SetBorderBottom(new SolidBorder(DeviceRgb.BLACK, 1));
+                    table.AddCell(cell1);
+                    table.AddCell(cell2);
+                    table.AddCell(cell3);
+                    table.AddCell(cell4);
+                    table.AddCell(cell5);
+                    table.AddCell(cell6);
+                    table.AddCell(cell7);
+                    table.AddCell(cell8);
+                    table.AddCell(cell9);
+                    table.AddCell(cell10);
+                    table.AddCell(cell11);
+                    table.AddCell(cell12);
 
                     new Canvas(pdf.GetPage(i), pdf.GetDefaultPageSize())
                         .Add(titleHeader)
@@ -429,16 +488,16 @@ namespace LibraryPDF
         }
        
         // Method Generate PDF
-        public static void GeneratePDF()
+        public static void GeneratePDF(string excelPath, string excelSheet)
         {
             //Call method document summary
-            CreateDocumentSummary();
+            CreateDocumentSummary(excelPath, excelSheet);
             //Call method table of contents
             CreateTableOfContents();
-            //// Call method page number
+            // Call method page number
             CreatePageOfNumbers();
-
-            //CreateHeaderOfPage();
+            // Call method header of pages
+            CreateHeaderOfPage();
 
             document.Close();
         }

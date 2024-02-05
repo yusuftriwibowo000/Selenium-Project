@@ -7,19 +7,23 @@ using System.Collections.ObjectModel;
 using System.IO;
 using SeleniumNew;
 using LibraryPDF;
+using LibraryExcel;
 namespace SeleniumNew
 {
-
     public class Tests
     {
         public static IWebDriver driver = SingletonDriver.GetDriver();
         Actions action = new Actions(driver);
         public static List<string> screenshotPaths = new List<string>();
+        static string tempProjectDir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+        static string projectDir = tempProjectDir.Replace("\\", "/"); //Path project
+        public static string excelFilePath = projectDir + "/Excel/TC001_Login.xlsx";
+        public static string excelSheetName = "TC001";
 
         [OneTimeSetUp]
         public void SetUp()
         {
-            LibPDF.InitializeDocument(); // Initialize document before tests
+            LibPDF.InitializeDocument(excelFilePath, excelSheetName); // Initialize document before tests
             LibPDF.CreateCover();
         }
 
@@ -33,7 +37,7 @@ namespace SeleniumNew
             LibPDF.CaptureScreen(screenshotPaths, "Open Google.com", "Passed");
             Thread.Sleep(2000);
             IWebElement searchGoogle = driver.FindElement(By.Id("APjFqb"));
-            searchGoogle.SendKeys("Christian Lenglolo");
+            searchGoogle.SendKeys(LibExcel.GetDataExcel(excelFilePath, "DATA_SEARCH", excelSheetName));
             Thread.Sleep(2000);
             LibPDF.CaptureScreen(screenshotPaths, "Search di Google", "Passed");
             searchGoogle.SendKeys(Keys.Enter);
@@ -50,7 +54,7 @@ namespace SeleniumNew
        [TearDown]
        public void Close()
        {
-            LibPDF.GeneratePDF();
+            LibPDF.GeneratePDF(excelFilePath,excelSheetName);
             
             // Close Browser
             driver.Quit();
