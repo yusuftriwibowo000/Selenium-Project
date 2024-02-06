@@ -51,11 +51,11 @@ namespace SeleniumNew
             LibPDF.CaptureScreen(screenshotPaths, "Hasil dari Search (2)", "Passed");
         }
 
-       [TearDown]
-       public void Close()
-       {
-            LibPDF.GeneratePDF(excelFilePath,excelSheetName);
-            
+        [TearDown]
+        public void Close()
+        {
+            LibPDF.GeneratePDF(excelFilePath, excelSheetName);
+
             // Close Browser
             driver.Quit();
         }

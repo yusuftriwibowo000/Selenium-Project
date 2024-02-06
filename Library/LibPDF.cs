@@ -19,6 +19,8 @@ using iText.Layout.Borders;
 using SystemPath = System.IO.Path;
 using LibraryExcel;
 using SeleniumNew;
+using DocumentFormat.OpenXml.Vml.Spreadsheet;
+using iText.Kernel.Pdf.Action;
 
 namespace LibraryPDF
 {
@@ -178,6 +180,7 @@ namespace LibraryPDF
             string dataDocSum   = tableOfContent[indexDocSum];
             string[] splitDocSum = dataDocSum.Split(new string[] {".."}, StringSplitOptions.None);
 
+
             if (tableOfContent.Any())
             {
                 // Masukkan "Table of Contents" ke list Table of Contents
@@ -185,6 +188,7 @@ namespace LibraryPDF
                     .SetColor(DeviceRgb.BLACK, true)
                     .MoveText(xPosition, yPosition)
                     .ShowText(splitLastData[0])
+                    
                     .EndText();
                 canvas.BeginText().SetFontAndSize(PdfFontFactory.CreateFont(), 10)
                     .MoveText(xPosition2, yPosition)
@@ -213,7 +217,7 @@ namespace LibraryPDF
                     string[] splitContents = content.Split(new string[] {".."}, StringSplitOptions.None);
                     canvas.BeginText().SetFontAndSize(PdfFontFactory.CreateFont(), 10)
                         .MoveText(xPosition, yPosition)
-                        .ShowText(splitContents[0])
+                        .ShowText(Link(splitContents[0], PdfAction.CreateGoTo(splitContents[2])))
                         .EndText();
                     canvas.BeginText().SetFontAndSize(PdfFontFactory.CreateFont(), 10)
                         .MoveText(xPosition2, yPosition)
@@ -243,10 +247,17 @@ namespace LibraryPDF
                 .SetFontColor(fontColor)
                 .SetFixedPosition(centerX - 50, yPosition, 500);
 
+            // Buat Header Tabel Total Document Summary
+            Table tableTotal = new Table(4).SetFixedPosition(marginLeftRight, yPosition - 40, 475).SetFontSize(8).SetTextAlignment(TextAlignment.CENTER);
+            tableTotal.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Total Passed").SetBold()));
+            tableTotal.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Total Failed").SetBold()));
+            tableTotal.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Total Done").SetBold()));
+            tableTotal.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Total").SetBold()));
+
             int numRows = tableOfContent.Count - 1; // Jumlah row
             int numColumns = 5; // Jumlah coloumn
 
-            // Buat Header Document Summary
+            // Buat Header Tabel Test Step Document Summary
             Table table = new Table(numColumns).SetFixedPosition(marginLeftRight,yPosition-140,475).SetFontSize(8);
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("TC ID").SetBold()));
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Scenario Name").SetBold()));
@@ -266,9 +277,19 @@ namespace LibraryPDF
             }
             if(jmlFailed == 0)
             {
-                // Kolom yang di lakukan rowspan (Passed)
-                Cell tcID = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TC_ID", excelSheet)).SetFontColor(fontColor4));
-                Cell scenarioName = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "SCENARIO_NAME", excelSheet)).SetFontColor(fontColor4));
+                // Tabel Total Passed, Total Failed, Total Done, Total (Passed)
+                Cell totalPassed    = new Cell(numRows, 1).Add(new Paragraph("1").SetFontColor(fontColor4).SetFontSize(10));
+                Cell totalFailed    = new Cell(numRows, 1).Add(new Paragraph("0").SetFontColor(DeviceRgb.RED).SetFontSize(10));
+                Cell totalDone      = new Cell(numRows, 1).Add(new Paragraph("0").SetFontSize(10));
+                Cell total          = new Cell(numRows, 1).Add(new Paragraph("1").SetFontSize(10));
+                tableTotal.AddCell(totalPassed);
+                tableTotal.AddCell(totalFailed);
+                tableTotal.AddCell(totalDone);
+                tableTotal.AddCell(total);
+
+                // Kolom yang di lakukan rowspan di Tabel Test Step (Passed)
+                Cell tcID = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TC_ID" ,excelSheet)).SetFontColor(fontColor4));
+                Cell scenarioName = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "SCENARIO_NAME" , excelSheet)).SetFontColor(fontColor4));
                 Cell testCase = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TEST_CASE", excelSheet)).SetFontColor(fontColor4));
                 table.AddCell(tcID);
                 table.AddCell(scenarioName);
@@ -276,7 +297,17 @@ namespace LibraryPDF
             }
             else
             {
-                // Kolom yang di lakukan rowspan (Failed)
+                // Tabel Total Passed, Total Failed, Total Done, Total (Passed)
+                Cell totalPassed = new Cell(numRows, 1).Add(new Paragraph("0").SetFontColor(fontColor4).SetFontSize(10));
+                Cell totalFailed = new Cell(numRows, 1).Add(new Paragraph("1").SetFontColor(DeviceRgb.RED).SetFontSize(10));
+                Cell totalDone = new Cell(numRows, 1).Add(new Paragraph("0").SetFontSize(10));
+                Cell total = new Cell(numRows, 1).Add(new Paragraph("1").SetFontSize(10));
+                tableTotal.AddCell(totalPassed);
+                tableTotal.AddCell(totalFailed);
+                tableTotal.AddCell(totalDone);
+                tableTotal.AddCell(total);
+
+                // Kolom yang di lakukan rowspan di Tabel Test Step (Failed)
                 Cell tcID = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TC_ID", excelSheet)).SetFontColor(DeviceRgb.RED));
                 Cell scenarioName = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "SCENARIO_NAME", excelSheet)).SetFontColor(DeviceRgb.RED));
                 Cell testCase = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TEST_CASE", excelSheet)).SetFontColor(DeviceRgb.RED));
@@ -323,6 +354,7 @@ namespace LibraryPDF
             // Tambah element ke dokumen PDF
             new Canvas(page3, pdf.GetDefaultPageSize())
                 .Add(titleDocumentSummary)
+                .Add(tableTotal)
                 .Add(table);
         }
 
@@ -394,7 +426,13 @@ namespace LibraryPDF
             {
                 //create a document for each page
                 if (i != 1)
-                {                 
+                {
+                    PdfCanvas lineFooter = new PdfCanvas(pdf.GetPage(i));
+                    lineFooter.SetLineWidth(0.5f);
+                    lineFooter.MoveTo(marginLeftRight, 40)
+                        .LineTo(530,40)
+                        .Stroke();
+
                     document.ShowTextAligned(
                         new Paragraph().Add("Page " + i + " of " + n).SetItalic()
                         .SetFontSize(9),
