@@ -15,9 +15,7 @@ namespace SeleniumNew
         public static IWebDriver driver = SingletonDriver.GetDriver();
         Actions action = new Actions(driver);
         public static List<string> screenshotPaths = new List<string>();
-        static string tempProjectDir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
-        static string projectDir = tempProjectDir.Replace("\\", "/"); //Path project
-        public static string excelFilePath = projectDir + "/Excel/TC001_Login.xlsx";
+        public static string excelFilePath = LibPDF.projectDir + "/Excel/TC001_Login.xlsx";
         public static string excelSheetName = "TC001";
 
         [OneTimeSetUp]
@@ -30,7 +28,7 @@ namespace SeleniumNew
         [Test]
         public void TestLogin()
         {
-            driver.Navigate().GoToUrl("https://www.google.com/");
+            driver.Navigate().GoToUrl(LibExcel.GetDataExcel(LibPDF.globalExcelFilePath,"URL","Global"));
             Thread.Sleep(1000);
             driver.Manage().Window.Maximize();
             Thread.Sleep(2000);

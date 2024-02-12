@@ -19,14 +19,11 @@ using iText.Layout.Borders;
 using SystemPath = System.IO.Path;
 using LibraryExcel;
 using SeleniumNew;
-using DocumentFormat.OpenXml.Vml.Spreadsheet;
-using iText.Kernel.Pdf.Action;
 
 namespace LibraryPDF
 {
     public class LibPDF
     {
-        public static string projectDir;
         public static Document document;
         public static PdfDocument pdf;
         public static Color fontColor;
@@ -36,10 +33,13 @@ namespace LibraryPDF
         // Create a transparent color with an alpha value
         public static Color transparentColor;
         private static PageSize pageSize;
+        // Project Path
+        public static string tempProjectDir = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+        public static string projectDir = tempProjectDir.Replace("\\", "/"); //Path project
+        public static string globalExcelFilePath = projectDir + "/Excel/Global_Report.xlsx";
         private static List<string> tableOfContent = new List<string>();
         private static List<string> startEndDate = new List<string>();
         private static float verticalPosition;
-        private static float verticalPositionBottom;
         private static float centerX;
         private static float marginLeftRight;
         private static float marginTop;
@@ -59,8 +59,6 @@ namespace LibraryPDF
         // Inisialisasi Dokumen PDF
         public static void InitializeDocument(string excelPath, string excelSheet)
         {
-            string tempProjectDir   = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
-            projectDir              = tempProjectDir.Replace("\\", "/"); //Path project
             string reportDir        = SystemPath.Combine(tempProjectDir, "Report");
             string todayReportDir   = SystemPath.Combine(reportDir, DateTime.Now.ToString("yyyyMMdd"));
             string mainDir          = todayReportDir.Replace("\\", "/");
@@ -92,17 +90,17 @@ namespace LibraryPDF
         // Tambah halaman cover ke dokumen PDF
         public static void CreateCover()
         {
-            pageSize        = pdf.GetDefaultPageSize();
+            pageSize            = pdf.GetDefaultPageSize();
             startEndDate.Add(DateTime.Now.ToString("dd MMM yyyy HH:mm:ss")); // start testing date
-            float centerY   = (pageSize.GetHeight() / 2) + 90;
-            string headerText   = "Automation";
-            string headerText2  = "Regression Test";
-            string headerText3  = "Project Code";
-            string headerText4  = "Automation Test Execution Document";
-            string headerText5  = "Prepared By Automation Team";
+            float centerY       = (pageSize.GetHeight() / 2) + 90;
+            string headerText   = LibExcel.GetDataExcel(globalExcelFilePath, "COVER_TITLE", "Global");
+            string headerText2  = LibExcel.GetDataExcel(globalExcelFilePath, "COVER_SUBTITLE","Global");
+            string headerText3  = LibExcel.GetDataExcel(globalExcelFilePath, "PROJECT_CODE", "Global");
+            string headerText4  = LibExcel.GetDataExcel(globalExcelFilePath, "HEADER_DESCRIPTION", "Global");
+            string headerText5  = "Prepared By " + LibExcel.GetDataExcel(globalExcelFilePath, "AUTHOR", "Global");
             string headerText6  = DateTime.Now.ToString("yyyy-MM-dd");
             string headerText7  = "COPYRIGHT NOTICE";
-            string headerText8  = "Copyright "+DateTime.Now.ToString("yyyy")+" by Yusuf Tri Wibowo";
+            string headerText8  = "Copyright " + DateTime.Now.ToString("yyyy") + " by " + LibExcel.GetDataExcel(globalExcelFilePath, "CREATOR", "Global");
 
             Image logo = new Image(ImageDataFactory
             .Create(projectDir + "/Assets/MainImage.jpg"))
@@ -217,7 +215,7 @@ namespace LibraryPDF
                     string[] splitContents = content.Split(new string[] {".."}, StringSplitOptions.None);
                     canvas.BeginText().SetFontAndSize(PdfFontFactory.CreateFont(), 10)
                         .MoveText(xPosition, yPosition)
-                        .ShowText(Link(splitContents[0], PdfAction.CreateGoTo(splitContents[2])))
+                        .ShowText(splitContents[0])
                         .EndText();
                     canvas.BeginText().SetFontAndSize(PdfFontFactory.CreateFont(), 10)
                         .MoveText(xPosition2, yPosition)
@@ -444,7 +442,7 @@ namespace LibraryPDF
                         0       // rotation angle
                     );
                     document.ShowTextAligned(
-                        new Paragraph().Add("Automation - Regression Test").SetItalic()
+                        new Paragraph().Add(LibExcel.GetDataExcel(globalExcelFilePath, "PROJECT_NAME", "Global")).SetItalic()
                         .SetFontSize(9),
                         centerX,    // koordinat X
                         30,     // koordinat Y
@@ -480,7 +478,7 @@ namespace LibraryPDF
                 {
                     // Format element deskripsi gambar
                     Paragraph titleHeader = new Paragraph()
-                        .Add(new Text("Automation Test Execution Document").SetBold())
+                        .Add(new Text(LibExcel.GetDataExcel(globalExcelFilePath, "HEADER_DESCRIPTION", "Global")).SetBold())
                         .SetTextAlignment(TextAlignment.LEFT)
                         .SetFontSize(11)
                         .SetBold()
@@ -494,15 +492,15 @@ namespace LibraryPDF
                         .SetFixedPosition(marginLeftRight, verticalPosition - 50, 460);
 
                     Cell cell1 = new Cell(3, 1).Add(new Paragraph("Project No.")).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER);
-                    Cell cell2 = new Cell(3, 1).Add(new Paragraph("Project Code")).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER);
+                    Cell cell2 = new Cell(3, 1).Add(new Paragraph(LibExcel.GetDataExcel(globalExcelFilePath, "PROJECT_CODE", "Global"))).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER);
                     Cell cell3 = new Cell(3, 1).Add(new Paragraph("Tester")).SetBorderRight(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER);
-                    Cell cell4 = new Cell(3, 1).Add(new Paragraph("Automation Team")).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER);
+                    Cell cell4 = new Cell(3, 1).Add(new Paragraph(LibExcel.GetDataExcel(globalExcelFilePath, "AUTHOR", "Global"))).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER);
                     Cell cell5 = new Cell(3, 1).Add(new Paragraph("Project Type")).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER);
-                    Cell cell6 = new Cell(3, 1).Add(new Paragraph("CR / IR / MR")).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER);
+                    Cell cell6 = new Cell(3, 1).Add(new Paragraph(LibExcel.GetDataExcel(globalExcelFilePath, "PROJECT_TYPE", "Global"))).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER);
                     Cell cell7 = new Cell(3, 1).Add(new Paragraph("Start Date")).SetBorderRight(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER);
                     Cell cell8 = new Cell(3, 1).Add(new Paragraph(startEndDate[0])).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderBottom(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER);
                     Cell cell9 = new Cell(3, 1).Add(new Paragraph("Short Description")).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER).SetBorderBottom(new SolidBorder(DeviceRgb.BLACK, 1));
-                    Cell cell10 = new Cell(3, 1).Add(new Paragraph("Automation Test Execution Document")).SetBorderLeft(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER).SetBorderBottom(new SolidBorder(DeviceRgb.BLACK, 1));
+                    Cell cell10 = new Cell(3, 1).Add(new Paragraph(LibExcel.GetDataExcel(globalExcelFilePath, "HEADER_DESCRIPTION", "Global"))).SetBorderLeft(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER).SetBorderBottom(new SolidBorder(DeviceRgb.BLACK, 1));
                     Cell cell11 = new Cell(3, 1).Add(new Paragraph("End Date")).SetBorderRight(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER).SetBorderBottom(new SolidBorder(DeviceRgb.BLACK, 1));
                     Cell cell12 = new Cell(3, 1).Add(new Paragraph(startEndDate[1])).SetBorderRight(Border.NO_BORDER).SetBorderLeft(Border.NO_BORDER).SetBorderTop(Border.NO_BORDER).SetBorderBottom(new SolidBorder(DeviceRgb.BLACK, 1));
                     table.AddCell(cell1);
