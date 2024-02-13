@@ -256,7 +256,7 @@ namespace LibraryPDF
             int numColumns = 5; // Jumlah coloumn
 
             // Buat Header Tabel Test Step Document Summary
-            Table table = new Table(numColumns).SetFixedPosition(marginLeftRight,yPosition-140,475).SetFontSize(8);
+            Table table = new Table(numColumns).SetFixedPosition(marginLeftRight,560,475).SetFontSize(8);
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("TC ID").SetBold()));
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Scenario Name").SetBold()));
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Test Case").SetBold()));

@@ -13,6 +13,7 @@ namespace SeleniumNew
     public class Tests
     {
         public static IWebDriver driver = SingletonDriver.GetDriver();
+        IWebElement element;
         Actions action = new Actions(driver);
         public static List<string> screenshotPaths = new List<string>();
         public static string excelFilePath = LibPDF.projectDir + "/Excel/TC001_Login.xlsx";
@@ -34,19 +35,58 @@ namespace SeleniumNew
             Thread.Sleep(2000);
             LibPDF.CaptureScreen(screenshotPaths, "Open Google.com", "Passed");
             Thread.Sleep(2000);
-            IWebElement searchGoogle = driver.FindElement(By.Id("APjFqb"));
-            searchGoogle.SendKeys(LibExcel.GetDataExcel(excelFilePath, "DATA_SEARCH", excelSheetName));
+            element = driver.FindElement(By.Id("APjFqb"));
+            element.SendKeys(LibExcel.GetDataExcel(excelFilePath, "DATA_SEARCH", excelSheetName));
             Thread.Sleep(2000);
-            LibPDF.CaptureScreen(screenshotPaths, "Search di Google", "Passed");
-            searchGoogle.SendKeys(Keys.Enter);
+            LibPDF.CaptureScreen(screenshotPaths, "Search di Google", "Done");
+            element.SendKeys(Keys.Enter);
             Thread.Sleep(2000);
             LibPDF.CaptureScreen(screenshotPaths, "Hasil dari Search", "Passed");
             Thread.Sleep(1000);
-            action.Click().Perform();
-            Thread.Sleep(1000);
-            action.SendKeys(Keys.PageDown).Perform();
-            Thread.Sleep(1000);
-            LibPDF.CaptureScreen(screenshotPaths, "Hasil dari Search (2)", "Passed");
+
+            //bool isElementExist = false;
+            element = driver.FindElement(By.XPath("//cite[@class='qLRx3b tjvcx GvPZzd cHaqb' and text()='https://en.wikipedia.org']"));
+            if (element.Displayed)
+            {
+                element.Click();
+                //isElementExist = true;
+            }
+            //else
+            //{
+            //    action.Click().Perform();
+            //    Thread.Sleep(1000);
+
+            //    int i = 2;
+            //    while (!isElementExist)
+            //    {
+            //        action.SendKeys(Keys.PageDown).Perform();
+            //        Thread.Sleep(1000);
+            //        LibPDF.CaptureScreen(screenshotPaths, "Hasil dari Search "+i, "Passed");
+            //        i++;
+
+            //        if(element.Displayed)
+            //        {
+            //            element.Click();
+            //            isElementExist = true;
+            //        }
+            //    }
+            //}
+            Thread.Sleep(2000);
+            element = driver.FindElement(By.XPath("//span[@class='mw-page-title-main']"));
+            if (element.Displayed)
+            {
+                LibPDF.CaptureScreen(screenshotPaths, "Halaman Profil " + LibExcel.GetDataExcel(excelFilePath, "DATA_SEARCH", excelSheetName), "Passed");
+                action.Click().Perform();
+                Thread.Sleep(1000);
+                action.SendKeys(Keys.PageDown).Perform();
+                Thread.Sleep(1000);
+                LibPDF.CaptureScreen(screenshotPaths, "Halaman Profil " + LibExcel.GetDataExcel(excelFilePath, "DATA_SEARCH", excelSheetName) + "(2)", "Passed");
+            }
+            //action.Click().Perform();
+            //Thread.Sleep(1000);
+            //action.SendKeys(Keys.PageDown).Perform();
+            //Thread.Sleep(1000);
+            //LibPDF.CaptureScreen(screenshotPaths, "Hasil dari Search (2)", "Passed");
         }
 
         [TearDown]
