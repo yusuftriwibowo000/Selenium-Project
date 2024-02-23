@@ -19,6 +19,8 @@ using iText.Layout.Borders;
 using SystemPath = System.IO.Path;
 using LibraryExcel;
 using SeleniumNew;
+using iText.Layout.Layout;
+//using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace LibraryPDF
 {
@@ -242,11 +244,11 @@ namespace LibraryPDF
             Paragraph titleDocumentSummary = new Paragraph(titleDocSum)
                 .SetFontSize(14)
                 .SetBold()
-                .SetFontColor(fontColor)
-                .SetFixedPosition(centerX - 50, yPosition, 500);
+                .SetFontColor(fontColor);
+                //.SetFixedPosition(centerX - 50, yPosition, 500);
 
             // Buat Header Tabel Total Document Summary
-            Table tableTotal = new Table(4).SetFixedPosition(marginLeftRight, yPosition - 40, 475).SetFontSize(8).SetTextAlignment(TextAlignment.CENTER);
+            Table tableTotal = new Table(4).SetFontSize(8).SetTextAlignment(TextAlignment.CENTER);
             tableTotal.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Total Passed").SetBold()));
             tableTotal.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Total Failed").SetBold()));
             tableTotal.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Total Done").SetBold()));
@@ -256,7 +258,7 @@ namespace LibraryPDF
             int numColumns = 5; // Jumlah coloumn
 
             // Buat Header Tabel Test Step Document Summary
-            Table table = new Table(numColumns).SetFixedPosition(marginLeftRight,560,475).SetFontSize(8);
+            Table table = new Table(numColumns).SetFontSize(8);
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("TC ID").SetBold()));
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Scenario Name").SetBold()));
             table.AddHeaderCell(new Cell().SetBackgroundColor(fontColor3).Add(new Paragraph("Test Case").SetBold()));
@@ -273,46 +275,23 @@ namespace LibraryPDF
                     jmlFailed++;
                 }
             }
-            if(jmlFailed == 0)
-            {
-                // Tabel Total Passed, Total Failed, Total Done, Total (Passed)
-                Cell totalPassed    = new Cell(numRows, 1).Add(new Paragraph("1").SetFontColor(fontColor4).SetFontSize(10));
-                Cell totalFailed    = new Cell(numRows, 1).Add(new Paragraph("0").SetFontColor(DeviceRgb.RED).SetFontSize(10));
-                Cell totalDone      = new Cell(numRows, 1).Add(new Paragraph("0").SetFontSize(10));
-                Cell total          = new Cell(numRows, 1).Add(new Paragraph("1").SetFontSize(10));
-                tableTotal.AddCell(totalPassed);
-                tableTotal.AddCell(totalFailed);
-                tableTotal.AddCell(totalDone);
-                tableTotal.AddCell(total);
+            // Tabel Total Passed, Total Failed, Total Done, Total (Passed)
+            Cell totalPassed = new Cell(numRows, 1).Add(new Paragraph((jmlFailed == 0) ? "1" : "0").SetFontColor(fontColor4).SetFontSize(10));
+            Cell totalFailed = new Cell(numRows, 1).Add(new Paragraph((jmlFailed > 0) ? "1" : "0").SetFontColor(DeviceRgb.RED).SetFontSize(10));
+            Cell totalDone = new Cell(numRows, 1).Add(new Paragraph("0").SetFontSize(10)); // Assuming you need to set this accordingly
+            Cell total = new Cell(numRows, 1).Add(new Paragraph("1").SetFontSize(10));
+            tableTotal.AddCell(totalPassed);
+            tableTotal.AddCell(totalFailed);
+            tableTotal.AddCell(totalDone);
+            tableTotal.AddCell(total);
 
-                // Kolom yang di lakukan rowspan di Tabel Test Step (Passed)
-                Cell tcID = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TC_ID" ,excelSheet)).SetFontColor(fontColor4));
-                Cell scenarioName = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "SCENARIO_NAME" , excelSheet)).SetFontColor(fontColor4));
-                Cell testCase = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TEST_CASE", excelSheet)).SetFontColor(fontColor4));
-                table.AddCell(tcID);
-                table.AddCell(scenarioName);
-                table.AddCell(testCase);
-            }
-            else
-            {
-                // Tabel Total Passed, Total Failed, Total Done, Total (Passed)
-                Cell totalPassed = new Cell(numRows, 1).Add(new Paragraph("0").SetFontColor(fontColor4).SetFontSize(10));
-                Cell totalFailed = new Cell(numRows, 1).Add(new Paragraph("1").SetFontColor(DeviceRgb.RED).SetFontSize(10));
-                Cell totalDone = new Cell(numRows, 1).Add(new Paragraph("0").SetFontSize(10));
-                Cell total = new Cell(numRows, 1).Add(new Paragraph("1").SetFontSize(10));
-                tableTotal.AddCell(totalPassed);
-                tableTotal.AddCell(totalFailed);
-                tableTotal.AddCell(totalDone);
-                tableTotal.AddCell(total);
-
-                // Kolom yang di lakukan rowspan di Tabel Test Step (Failed)
-                Cell tcID = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TC_ID", excelSheet)).SetFontColor(DeviceRgb.RED));
-                Cell scenarioName = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "SCENARIO_NAME", excelSheet)).SetFontColor(DeviceRgb.RED));
-                Cell testCase = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TEST_CASE", excelSheet)).SetFontColor(DeviceRgb.RED));
-                table.AddCell(tcID);
-                table.AddCell(scenarioName);
-                table.AddCell(testCase);
-            }
+            // Kolom yang di lakukan rowspan di Tabel Test Step (Passed or Failed)
+            Cell tcID = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TC_ID", excelSheet)).SetFontColor((jmlFailed > 0) ? DeviceRgb.RED : fontColor4));
+            Cell scenarioName = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "SCENARIO_NAME", excelSheet)).SetFontColor((jmlFailed > 0) ? DeviceRgb.RED : fontColor4));
+            Cell testCase = new Cell(numRows, 1).Add(new Paragraph(LibExcel.GetDataExcel(excelPath, "TEST_CASE", excelSheet)).SetFontColor((jmlFailed > 0) ? DeviceRgb.RED : fontColor4));
+            table.AddCell(tcID);
+            table.AddCell(scenarioName);
+            table.AddCell(testCase);
 
             // Set kolom Procedure/Test Step dan Status di tambahkan ke tabel sesuai step yang ada tiap TC
             for (int row = 0; row < numRows; row++)
@@ -351,9 +330,19 @@ namespace LibraryPDF
             }
             // Tambah element ke dokumen PDF
             new Canvas(page3, pdf.GetDefaultPageSize())
-                .Add(titleDocumentSummary)
-                .Add(tableTotal)
-                .Add(table);
+                .Add(titleDocumentSummary.SetFixedPosition(centerX - 50, yPosition, 500));
+
+            new Canvas(page3, pdf.GetDefaultPageSize())
+                .Add(tableTotal.SetFixedPosition(marginLeftRight, yPosition - 40, 460));
+
+            // Mengatur layout untuk menghitung tinggi tanpa menambahkan ke dalam dokumen
+            LayoutResult layoutResult = table.CreateRendererSubTree().SetParent(new Document(new PdfDocument(new PdfWriter(new System.IO.MemoryStream()))).GetRenderer()).Layout(new LayoutContext(new LayoutArea(1, PageSize.A4)));
+
+            // Mengambil tinggi hasil layout
+            float tableHeight = layoutResult.GetOccupiedArea().GetBBox().GetHeight();
+
+            new Canvas(page3, pdf.GetDefaultPageSize())
+                .Add(table.SetFixedPosition(marginLeftRight, yPosition - 100 - tableHeight, 460));
         }
 
         // Method screenshot step by step
