@@ -20,6 +20,8 @@ using SystemPath = System.IO.Path;
 using LibraryExcel;
 using SeleniumNew;
 using iText.Layout.Layout;
+using iText.Kernel.Pdf.Action;
+using iText.Kernel.Pdf.Navigation;
 //using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace LibraryPDF
@@ -188,7 +190,6 @@ namespace LibraryPDF
                     .SetColor(DeviceRgb.BLACK, true)
                     .MoveText(xPosition, yPosition)
                     .ShowText(splitLastData[0])
-                    
                     .EndText();
                 canvas.BeginText().SetFontAndSize(PdfFontFactory.CreateFont(), 10)
                     .MoveText(xPosition2, yPosition)
